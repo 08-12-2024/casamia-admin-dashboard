@@ -5,10 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CASA MIA Admin Dashboard</title>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
 body{
 margin:0;
-font-family:Arial, sans-serif;
+font-family:Arial,sans-serif;
 background:#06233f;
 color:white;
 }
@@ -106,34 +108,35 @@ font-size:13px;
 
 <div class="container">
 
-<h1>Benvenuto nella Dashboard Admin</h1>
-<p>Da qui controllerai clienti, imprese, lavori e matching.</p>
+<h1>Dashboard Admin Live</h1>
+<p>Dati collegati al database Supabase.</p>
 
 <div class="cards">
 
 <div class="card">
 <h3>Lead clienti</h3>
-<div class="number">0</div>
+<div class="number" id="leadsCount">0</div>
 </div>
 
 <div class="card">
 <h3>Imprese</h3>
-<div class="number">0</div>
+<div class="number" id="companiesCount">0</div>
 </div>
 
 <div class="card">
 <h3>Lavori aperti</h3>
-<div class="number">0</div>
+<div class="number" id="jobsCount">0</div>
 </div>
 
 <div class="card">
 <h3>Match creati</h3>
-<div class="number">0</div>
+<div class="number" id="matchesCount">0</div>
 </div>
 
 </div>
 
 <div class="table">
+
 <h2>Ultimi lavori</h2>
 
 <div class="row header">
@@ -143,23 +146,78 @@ font-size:13px;
 <div>Stato</div>
 </div>
 
+<div id="jobsTable"></div>
+
+</div>
+
+</div>
+
+<script>
+
+const SUPABASE_URL = "https://qoynblmqhmtdazuhdygv.supabase.co";
+
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFveW5ibG1xaG10ZGF6dWhkeWd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4OTYzODAsImV4cCI6MjA5NDQ3MjM4MH0.o4e9Kzoez_EMyDm0iIqiC45L3jXsPdCuh83PmAcnwyI";
+
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+async function countTable(table, elementId){
+
+const { count } = await db
+.from(table)
+.select("*", { count: "exact", head: true });
+
+document.getElementById(elementId).innerText = count || 0;
+}
+
+async function loadDashboard(){
+
+await countTable("leads", "leadsCount");
+await countTable("companies", "companiesCount");
+await countTable("jobs", "jobsCount");
+await countTable("matches", "matchesCount");
+
+const { data } = await db
+.from("jobs")
+.select("*")
+.order("created_at", { ascending:false })
+.limit(10);
+
+const table = document.getElementById("jobsTable");
+
+table.innerHTML = "";
+
+if(!data || data.length === 0){
+
+table.innerHTML = `
 <div class="row">
-<div>Mario Rossi</div>
-<div>Napoli</div>
-<div>Ristrutturazione bagno</div>
-<div><span class="badge">Nuovo</span></div>
+<div>Nessun lavoro</div>
+<div>-</div>
+<div>-</div>
+<div><span class="badge">Vuoto</span></div>
 </div>
+`;
 
+return;
+}
+
+data.forEach(job => {
+
+table.innerHTML += `
 <div class="row">
-<div>Anna Verdi</div>
-<div>Milano</div>
-<div>Impianto elettrico</div>
-<div><span class="badge">Nuovo</span></div>
+<div>${job.customer_name || "-"}</div>
+<div>${job.city || "-"}</div>
+<div>${job.service_required || "-"}</div>
+<div><span class="badge">${job.status || "new"}</span></div>
 </div>
+`;
 
-</div>
+});
 
-</div>
+}
+
+loadDashboard();
+
+</script>
 
 </body>
 </html>
