@@ -8,6 +8,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
+
 body{
 margin:0;
 font-family:Arial,sans-serif;
@@ -96,10 +97,70 @@ border-radius:999px;
 font-weight:bold;
 font-size:13px;
 }
+
 </style>
 </head>
 
 <body>
+
+<div id="loginScreen" style="
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:#04182c;
+display:flex;
+justify-content:center;
+align-items:center;
+z-index:999;
+">
+
+<div style="
+background:white;
+padding:40px;
+border-radius:20px;
+width:320px;
+text-align:center;
+">
+
+<h2 style="color:#06233f;">Login Admin</h2>
+
+<input
+id="passwordInput"
+type="password"
+placeholder="Password admin"
+style="
+width:100%;
+padding:15px;
+margin-top:20px;
+border-radius:10px;
+border:1px solid #ccc;
+font-size:16px;
+"
+/>
+
+<button
+onclick="loginAdmin()"
+style="
+margin-top:20px;
+width:100%;
+padding:15px;
+border:none;
+border-radius:10px;
+background:#06233f;
+color:white;
+font-size:16px;
+cursor:pointer;
+">
+Accedi
+</button>
+
+<p id="loginError" style="color:red;margin-top:10px;"></p>
+
+</div>
+
+</div>
 
 <header>
 <div class="logo">CASA MIA Admin</div>
@@ -158,7 +219,10 @@ const SUPABASE_URL = "https://qoynblmqhmtdazuhdygv.supabase.co";
 
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFveW5ibG1xaG10ZGF6dWhkeWd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4OTYzODAsImV4cCI6MjA5NDQ3MjM4MH0.o4e9Kzoez_EMyDm0iIqiC45L3jXsPdCuh83PmAcnwyI";
 
-const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const db = supabase.createClient(
+SUPABASE_URL,
+SUPABASE_ANON_KEY
+);
 
 async function countTable(table, elementId){
 
@@ -166,14 +230,19 @@ const { count } = await db
 .from(table)
 .select("*", { count: "exact", head: true });
 
-document.getElementById(elementId).innerText = count || 0;
+document.getElementById(elementId).innerText =
+count || 0;
+
 }
 
 async function loadDashboard(){
 
 await countTable("leads", "leadsCount");
+
 await countTable("companies", "companiesCount");
+
 await countTable("jobs", "jobsCount");
+
 await countTable("matches", "matchesCount");
 
 const { data } = await db
@@ -182,7 +251,8 @@ const { data } = await db
 .order("created_at", { ascending:false })
 .limit(10);
 
-const table = document.getElementById("jobsTable");
+const table =
+document.getElementById("jobsTable");
 
 table.innerHTML = "";
 
@@ -198,6 +268,7 @@ table.innerHTML = `
 `;
 
 return;
+
 }
 
 data.forEach(job => {
@@ -212,6 +283,25 @@ table.innerHTML += `
 `;
 
 });
+
+}
+
+function loginAdmin(){
+
+const password =
+document.getElementById("passwordInput").value;
+
+if(password === "casamia2026"){
+
+document.getElementById("loginScreen").style.display =
+"none";
+
+}else{
+
+document.getElementById("loginError").innerText =
+"Password errata";
+
+}
 
 }
 
